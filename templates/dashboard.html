@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - VideoHost{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-0">
+            <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+        </h1>
+        <p class="text-muted">Welcome back, {{ current_user.username }}!</p>
+    </div>
+    <a href="{{ url_for('upload') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Upload Video
+    </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ videos|length }}</h4>
+                        <p class="card-text">Total Videos</p>
+                    </div>
+                    <i class="fas fa-video fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ videos|sum(attribute='views') or 0 }}</h4>
+                        <p class="card-text">Total Views</p>
+                    </div>
+                    <i class="fas fa-eye fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ "%.1f"|format((videos|sum(attribute='file_size') or 0) / 1024 / 1024) }} MB</h4>
+                        <p class="card-text">Storage Used</p>
+                    </div>
+                    <i class="fas fa-hdd fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Videos Section -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-video me-2"></i>Your Videos
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if videos %}
+            <div class="row">
+                {% for video in videos %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="video-card card h-100">
+                        <div class="video-thumbnail position-relative" data-video-id="{{ video.id }}">
+                            <video class="thumbnail-video" muted preload="metadata" poster="">
+                                <source src="{{ url_for('serve_video', video_id=video.id) }}" type="video/mp4">
+                            </video>
+                            <div class="thumbnail-overlay d-flex align-items-center justify-content-center">
+                                <i class="fas fa-play-circle fa-3x text-white"></i>
+                            </div>
+                            <div class="video-duration">
+                                {% if video.duration %}
+                                    {{ "%.0f"|format(video.duration) }}s
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-truncate" title="{{ video.title }}">
+                                {{ video.title }}
+                            </h6>
+                            {% if video.description %}
+                                <p class="card-text text-muted small text-truncate" title="{{ video.description }}">
+                                    {{ video.description }}
+                                </p>
+                            {% endif %}
+                            <div class="video-meta small text-muted mb-3">
+                                <div><i class="fas fa-calendar me-1"></i>{{ video.upload_date.strftime('%b %d, %Y') }}</div>
+                                <div><i class="fas fa-eye me-1"></i>{{ video.views }} views</div>
+                                <div><i class="fas fa-file me-1"></i>{{ "%.1f"|format(video.file_size / 1024 / 1024) }} MB</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('player', video_id=video.id) }}" class="btn btn-primary btn-sm flex-fill">
+                                    <i class="fas fa-play me-1"></i>Watch
+                                </a>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" title="Share Options">
+                                        <i class="fas fa-share"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <button class="dropdown-item" onclick="copyLink('{{ url_for('player', video_id=video.id, _external=True) }}')">
+                                                <i class="fas fa-link me-2"></i>Full Page Link
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item" onclick="copyLink('{{ url_for('watch_direct', video_id=video.id, _external=True) }}')">
+                                                <i class="fas fa-external-link-alt me-2"></i>Direct Player Link
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <form method="POST" action="{{ url_for('delete_video', video_id=video.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this video?')">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Video">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-video fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No videos yet</h4>
+                <p class="text-muted">Upload your first video to get started!</p>
+                <a href="{{ url_for('upload') }}" class="btn btn-primary">
+                    <i class="fas fa-upload me-2"></i>Upload Video
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function copyLink(url) {
+    navigator.clipboard.writeText(url).then(function() {
+        // Create temporary toast notification
+        const toast = document.createElement('div');
+        toast.className = 'toast position-fixed top-0 end-0 m-3';
+        toast.innerHTML = `
+            <div class="toast-body bg-success text-white">
+                <i class="fas fa-check me-2"></i>Link copied to clipboard!
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        // Show and auto-hide toast
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }).catch(function(err) {
+        alert('Failed to copy link: ' + err);
+    });
+}
+
+// Video thumbnail preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const videoThumbnails = document.querySelectorAll('.video-thumbnail');
+    
+    videoThumbnails.forEach(thumbnail => {
+        const video = thumbnail.querySelector('.thumbnail-video');
+        const overlay = thumbnail.querySelector('.thumbnail-overlay');
+        let playTimeout;
+        
+        if (!video) return;
+        
+        // Set video to first frame
+        video.addEventListener('loadedmetadata', function() {
+            video.currentTime = 1; // Jump to 1 second to get a better thumbnail
+        });
+        
+        thumbnail.addEventListener('mouseenter', function() {
+            // Delay before starting playback to avoid accidental plays
+            playTimeout = setTimeout(() => {
+                video.currentTime = 0;
+                video.play().catch(e => {
+                    console.log('Video play failed:', e);
+                });
+            }, 300);
+        });
+        
+        thumbnail.addEventListener('mouseleave', function() {
+            clearTimeout(playTimeout);
+            video.pause();
+            video.currentTime = 1; // Reset to thumbnail frame
+        });
+        
+        // Handle video loading errors
+        video.addEventListener('error', function() {
+            // Show placeholder if video fails to load
+            const placeholder = document.createElement('div');
+            placeholder.className = 'thumbnail-placeholder d-flex align-items-center justify-content-center bg-light';
+            placeholder.innerHTML = '<i class="fas fa-play-circle fa-3x text-primary"></i>';
+            thumbnail.appendChild(placeholder);
+        });
+        
+        // Click to navigate to player
+        thumbnail.addEventListener('click', function(e) {
+            e.preventDefault();
+            const videoId = thumbnail.dataset.videoId;
+            window.location.href = `/player/${videoId}`;
+        });
+    });
+});
+</script>
+{% endblock %}

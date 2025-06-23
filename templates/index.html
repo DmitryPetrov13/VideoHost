@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}VideoHost - Private Video Hosting{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="display-4 fw-bold text-primary mb-4">
+                <i class="fas fa-video me-3"></i>VideoHost
+            </h1>
+            <p class="lead mb-4">
+                Your secure, private video hosting platform. Upload, manage, and share your videos with complete control over privacy and access.
+            </p>
+            
+            {% if not current_user.is_authenticated %}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-md-2">
+                        <i class="fas fa-user-plus me-2"></i>Get Started
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                </div>
+            {% else %}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg me-md-2">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('upload') }}" class="btn btn-success btn-lg">
+                        <i class="fas fa-upload me-2"></i>Upload Video
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4 mb-4">
+        <div class="feature-card text-center p-4">
+            <div class="feature-icon mb-3">
+                <i class="fas fa-shield-alt fa-3x text-primary"></i>
+            </div>
+            <h4>Private & Secure</h4>
+            <p class="text-muted">Your videos are stored securely with private access controls. Only you decide who can view your content.</p>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="feature-card text-center p-4">
+            <div class="feature-icon mb-3">
+                <i class="fas fa-play-circle fa-3x text-success"></i>
+            </div>
+            <h4>Custom Player</h4>
+            <p class="text-muted">Beautiful, responsive video player with custom controls designed for the best viewing experience.</p>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="feature-card text-center p-4">
+            <div class="feature-icon mb-3">
+                <i class="fas fa-link fa-3x text-info"></i>
+            </div>
+            <h4>Direct Links</h4>
+            <p class="text-muted">Get direct links to your videos for easy sharing and embedding wherever you need them.</p>
+        </div>
+    </div>
+</div>
+
+{% if not current_user.is_authenticated %}
+<div class="cta-section bg-light rounded p-5 mt-5 text-center">
+    <h3 class="mb-3">Ready to get started?</h3>
+    <p class="mb-4">Join VideoHost today and take control of your video hosting needs.</p>
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+        <i class="fas fa-rocket me-2"></i>Start Hosting Videos
+    </a>
+</div>
+{% endif %}
+{% endblock %}
